@@ -18,3 +18,12 @@ Defines Network, a configurable class representing a sequential neural network w
 
 ### main.py
 Data loading, training and validation scripts. Running it trains the networks described in experiments. For loading the data it expects two files "data/mnist_train.csv" and "data/mnist_test.csv". These can be downloaded from https://pjreddie.com/projects/mnist-in-csv/. To run use "python3 main.py".
+
+## Design choices:
+### MeanOnlyBatchNorm
+This class initialized with a dim parameter, generate the inital variable beta, if it is training, save the X, X_norm, mu, and beta for backward propagation.
+
+### Pytest - test_BN_gradient_check
+This test function takes inputs, row dim, and the gradient from inputs as parameters, it also takes an optional parameter epsilon, I use +epsilon and -epsilon to initialize beta, and calculate forward to get the approximitly gradient value. check the difference between grad and gradapprox using the numerical method with the equation: (grad-gradapprox)/(grad+gradapprox).
+If the difference bigger than eqslion, the gradient calculation is wrong, otherwise, it is correct.
+

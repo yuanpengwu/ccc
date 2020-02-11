@@ -1,6 +1,6 @@
 import numpy as np
 
-from layers import Linear, ReLU, SoftmaxCrossEntropyLoss
+from layers import MeanOnlyBatchNorm, Linear, ReLU, SoftmaxCrossEntropyLoss
 from network import Network
 
 
@@ -16,12 +16,15 @@ def main():
 
     inputs, labels = load_normalized_mnist_data()
 
-    # Define network without batch norm
+    # Define network with batch norm
     net = Network(learning_rate = 1e-3)
+    net.add_layer(MeanOnlyBatchNorm(dim))
     net.add_layer(Linear(dim, 256))
     net.add_layer(ReLU())
+    net.add_layer(MeanOnlyBatchNorm(256))
     net.add_layer(Linear(256, 128))
     net.add_layer(ReLU())
+    net.add_layer(MeanOnlyBatchNorm(128))
     net.add_layer(Linear(128, n_classes))
     net.set_loss(SoftmaxCrossEntropyLoss())
 

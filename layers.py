@@ -81,6 +81,39 @@ class ReLU(Layer):
             raise RuntimeError('Gradient cache not defined. When training the train argument must be set to true in the forward pass.')
         return dY * (self.cache_in >= 0), []
 
+class MeanOnlyBatchNorm(Layer):
+    def __init__(self, dim):
+        '''
+        Represents a batch normalizition only use mean only
+            MeanOnlyBatchNorm(x) = X-mean(X) + beta
+        '''
+        self.beta = np.zeros((1, dim))
+        self.cache_in = None
+
+    def forward(self, X, train=True):
+        mu = np.mean(X, axis=0)
+        X_norm = X-mu
+        if train:
+            self.cache_in = (X, X_norm, mu)
+        out =  X_norm+self.beta
+        return out
+
+    def backward(self, dY):
+        if self.cache_in == None:
+            raise RuntimeError('Gradient cache not defined. When training the train argument must be set to true in the forward pass.')
+        X, X_norm, mu = self.cache_in
+        N, D = X.shape
+
+
+        dX_norm = dY
+        dbeta = np.sum(dY, axis=0, keepdims=True)
+        dmu = np.sum(-dX_norm, axis=0) + np.mean(X_norm, axis=0)
+        dX = dX_norm + (dmu/N)
+
+        return dX, [(self.beta, dbeta)]
+
+
+
 class Loss(object):
     '''
     Abstract class representing a loss function
